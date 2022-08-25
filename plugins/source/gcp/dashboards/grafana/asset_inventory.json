@@ -123,7 +123,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select count(*) from gcp_resources where project_id in (${project_ids}) and region in (${regions}) and cq_table in (${cq_tables}) ;",
+          "rawSql": "select count(*)\nfrom gcp_resources\nwhere project_id in (${project_ids})\n  and (CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n    END) in (${regions})\n  and cq_table in (${cq_tables});",
           "refId": "A"
         }
       ],
@@ -183,7 +183,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select project_id, count(*) from gcp_resources where region in (${regions}) and cq_table in (${cq_tables}) group by project_id order by count desc;",
+          "rawSql": "select project_id, count(*)\nfrom gcp_resources\nwhere (CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n    END) in (${regions})\n  and cq_table in (${cq_tables})\ngroup by project_id\norder by count desc;",
           "refId": "A"
         }
       ],
@@ -259,7 +259,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select region, count(*) from gcp_resources where project_id in (${project_ids}) group by region order by count desc;",
+          "rawSql": "select (CASE\n            WHEN region != '' THEN region\n            WHEN zone != '' THEN left(zone, -2)\n            ELSE 'global'\n    END) as location,\n       count(*)\nfrom gcp_resources\nwhere (CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n    END) in (${regions})\n  and project_id in (${project_ids})\n  and cq_table in (${cq_tables})\ngroup by location\norder by count desc;",
           "refId": "A"
         }
       ],
@@ -395,7 +395,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select cq_id, cq_table, project_id, region, id, fetch_date from gcp_resources where project_id in (${project_ids}) and region in (${regions}) and cq_table in (${cq_tables}) ;",
+          "rawSql": "select cq_id,\n       cq_table,\n       project_id,\n       (CASE\n            WHEN region != '' THEN region\n            WHEN zone != '' THEN left(zone, -2)\n            ELSE 'global'\n           END) as location,\n       id,\n       fetch_date\nfrom gcp_resources\nwhere project_id in (${project_ids})\n  and (CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n    END) in (${regions})\n  and cq_table in (${cq_tables});",
           "refId": "A",
           "select": [
             [
@@ -468,7 +468,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select cq_table, count(*) from gcp_resources where project_id in (${project_ids}) and region in (${regions}) group by cq_table order by count desc;",
+          "rawSql": "select cq_table, count(*)\nfrom gcp_resources\nwhere project_id in (${project_ids})\n  and (CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n    END) in (${regions})\n  and cq_table in (${cq_tables})\ngroup by cq_table\norder by count desc;",
           "refId": "A"
         }
       ],
@@ -552,7 +552,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select region, count(*) from gcp_resources where project_id in (${project_ids}) group by region order by count desc;",
+          "rawSql": "select CASE\n           WHEN region != '' THEN region\n           WHEN zone != '' THEN left(zone, -2)\n           ELSE 'global'\n           END as location, count(*)\nfrom gcp_resources\nwhere project_id in (${project_ids})\nand cq_table in (${cq_tables})\ngroup by location\norder by count desc;",
           "refId": "A"
         }
       ],
@@ -590,13 +590,13 @@
           "type": "postgres",
           "uid": "${DS_POSTGRESQL}"
         },
-        "definition": "select distinct(region) from gcp_resources;",
+        "definition": "select distinct(CASE\n                    WHEN region != '' THEN region\n                    WHEN zone != '' THEN left(zone, -2)\n                    ELSE 'global'\n    END) as location\nfrom gcp_resources;",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "regions",
         "options": [],
-        "query": "select distinct(region) from gcp_resources;",
+        "query": "select distinct(CASE\n                    WHEN region != '' THEN region\n                    WHEN zone != '' THEN left(zone, -2)\n                    ELSE 'global'\n    END) as location\nfrom gcp_resources;",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

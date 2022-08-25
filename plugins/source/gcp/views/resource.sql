@@ -20,11 +20,12 @@ LOOP
     END IF;
     -- create an SQL query to select from table and transform it into our resources view schema
     strSQL = strSQL || FORMAT('
-        SELECT cq_id, cq_meta, %L AS cq_table, project_id, %s AS region, id, %s AS name, %s AS description,
+        SELECT cq_id, cq_meta, %L AS cq_table, project_id, %s AS region, %s AS zone, id, %s AS name, %s AS description,
         COALESCE(%s, (cq_meta->>''last_updated'')::timestamp) AS fetch_date
         FROM %s',
         tbl,
-        CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='region' AND table_name=tbl) THEN 'region' ELSE E'\'unavailable\'' END,
+        CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='region' AND table_name=tbl) THEN 'split_part(region, ''/'', 9)' ELSE E'\'\'' END,
+        CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='zone' AND table_name=tbl) THEN 'split_part(zone, ''/'', 9)' ELSE E'\'\'' END,
         CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='name' AND table_name=tbl) THEN 'name' ELSE 'NULL' END,
         CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='description' AND table_name=tbl) THEN 'description' ELSE 'NULL' END,
         CASE WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE column_name='fetch_date' AND table_name=tbl) THEN 'fetch_date' ELSE 'NULL::timestamp' END,
